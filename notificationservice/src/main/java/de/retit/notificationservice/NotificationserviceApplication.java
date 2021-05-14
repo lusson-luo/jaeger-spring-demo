@@ -1,17 +1,18 @@
 package de.retit.notificationservice;
 
-import io.jaegertracing.Configuration;
-import io.jaegertracing.internal.JaegerTracer;
-import io.jaegertracing.internal.reporters.CompositeReporter;
-import io.jaegertracing.internal.samplers.ConstSampler;
-import io.jaegertracing.spi.Reporter;
-import io.jaegertracing.spi.Sampler;
+import net.devh.boot.grpc.server.service.GrpcService;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
+
+import io.grpc.examples.helloworld.GreeterGrpc;
+import io.grpc.examples.helloworld.HelloReply;
+import io.grpc.examples.helloworld.HelloRequest;
+import io.grpc.stub.StreamObserver;
 
 @SpringBootApplication
 public class NotificationserviceApplication {
@@ -26,6 +27,16 @@ public class NotificationserviceApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(NotificationserviceApplication.class, args);
+	}
+
+	@GrpcService
+	public static class GreeterService extends GreeterGrpc.GreeterImplBase {
+		@Override
+		public void sayHello(HelloRequest request, StreamObserver<HelloReply> responseObserver) {
+			HelloReply reply = HelloReply.newBuilder().setMessage("Hello " + request.getName()).build();
+			responseObserver.onNext(reply);
+			responseObserver.onCompleted();
+		}
 	}
 
 }
